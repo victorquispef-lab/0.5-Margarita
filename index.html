@@ -132,19 +132,20 @@
             box-shadow: 0 0 15px #9d4edd;
         }
 
-        /* Estilo para el botón especial de Estrella / Cod */
+        /* Estilo para el icono de la Estrella en Morado Claro */
         .star-btn {
-            background: linear-gradient(45deg, #ff007f, #ffb703) !important;
-            border: 2px solid #ffffff !important;
-            color: #000 !important;
-            font-weight: 800 !important;
-            box-shadow: 0 0 25px rgba(255, 183, 3, 0.9) !important;
-            animation: pulseStar 1.2s infinite alternate;
+            background: linear-gradient(45deg, #7b2cbf, #9d4edd) !important;
+            border: 1px solid #d4a5ff !important;
+            color: #ffffff !important;
+            font-size: 1.4rem !important;
+            padding: 8px 22px !important;
+            box-shadow: 0 0 20px rgba(157, 78, 221, 0.9) !important;
+            animation: pulseStar 1.5s infinite alternate;
         }
 
         @keyframes pulseStar {
-            0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 0, 127, 0.8); }
-            100% { transform: scale(1.1); box-shadow: 0 0 35px rgba(255, 183, 3, 1); }
+            0% { transform: scale(1); box-shadow: 0 0 15px rgba(157, 78, 221, 0.6); }
+            100% { transform: scale(1.12); box-shadow: 0 0 30px rgba(212, 165, 255, 1); }
         }
 
         /* Transición de fundido (Fade) */
@@ -164,7 +165,7 @@
 </head>
 <body>
 
-    <!-- Pantalla de Bienvenida para evitar bloqueo de Audio -->
+    <!-- Pantalla de Bienvenida -->
     <div id="welcome-screen">
         <h1>BTS 360° EXPERIENCE</h1>
         <p>Prepárate para un recorrido inmersivo</p>
@@ -177,29 +178,22 @@
     <!-- Contenedor de la Escena 360 con A-Frame -->
     <a-scene embedded vr-mode-ui="enabled: false" renderer="antialias: true">
         <a-assets>
-            <!-- Imágenes panorámicas -->
             <img id="img-amb1" src="1.png" crossorigin="anonymous">
             <img id="img-amb2" src="2.jpg" crossorigin="anonymous">
             <img id="img-amb3" src="3.jpg" crossorigin="anonymous">
-            <!-- Mixin de animación para la estrella -->
             <a-mixin id="star-spin" animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear"></a-mixin>
         </a-assets>
 
         <!-- Esfera que proyecta la imagen 360 -->
         <a-sky id="sky-sphere" src="#img-amb1" rotation="0 -90 0"></a-sky>
 
-        <!-- Grupo de Estrella Interactiva 3D con Texto "CLICK AQUÍ" -->
+        <!-- Estrella Interactiva 3D en Morado Claro -->
         <a-entity id="bts-star" position="0 1.6 -3" visible="false">
             <a-entity mixin="star-spin">
-                <!-- Figura geométrica brillante en Dorado -->
-                <a-cone class="raycastable" position="0 0.5 0" rotation="180 0 0" radius-bottom="0.45" height="0.9" color="#FFD700" material="emissive: #FFD700; emissiveIntensity: 1;"></a-cone>
-                <a-cone class="raycastable" position="0 -0.5 0" rotation="0 0 0" radius-bottom="0.45" height="0.9" color="#FFD700" material="emissive: #FFD700; emissiveIntensity: 1;"></a-cone>
-                <!-- Anillo brillante -->
-                <a-ring class="raycastable" radius-inner="0.65" radius-outer="0.8" rotation="90 0 0" color="#FFFFFF" material="side: double; emissive: #FFFFFF; emissiveIntensity: 1;"></a-ring>
+                <a-cone class="raycastable" position="0 0.5 0" rotation="180 0 0" radius-bottom="0.45" height="0.9" color="#c77dff" material="emissive: #9d4edd; emissiveIntensity: 0.9;"></a-cone>
+                <a-cone class="raycastable" position="0 -0.5 0" rotation="0 0 0" radius-bottom="0.45" height="0.9" color="#c77dff" material="emissive: #9d4edd; emissiveIntensity: 0.9;"></a-cone>
+                <a-ring class="raycastable" radius-inner="0.65" radius-outer="0.8" rotation="90 0 0" color="#e0aaff" material="side: double; emissive: #e0aaff; emissiveIntensity: 1;"></a-ring>
             </a-entity>
-
-            <!-- Texto 3D "CLICK AQUÍ" centrado debajo de la estrella -->
-            <a-text class="raycastable" value="CLICK AQUI" align="center" position="0 -1.2 0" color="#FFD700" scale="2 2 2" animation="property: scale; to: 2.3 2.3 2.3; dir: alternate; loop: true; dur: 800"></a-text>
         </a-entity>
 
         <!-- Cámara con raycaster activo -->
@@ -213,7 +207,7 @@
         <div class="hud-top" id="hud-title">AMBIENTE 1: 1.png</div>
         <div class="hud-bottom">
             <button class="nav-btn" id="prev-btn" style="display: none;">ANTERIOR</button>
-            <button class="nav-btn star-btn" id="star-btn" style="display: none;">⭐ CLICK AQUÍ (Ejecutar Cod)</button>
+            <button class="nav-btn star-btn" id="star-btn" style="display: none;">⭐</button>
             <button class="nav-btn" id="next-btn">SIGUIENTE AMBIENTE</button>
         </div>
     </div>
@@ -224,7 +218,6 @@
     <audio id="audio-3" src="3. Boy.mp3" preload="auto" loop></audio>
 
     <script>
-        // Variables de Control
         let currentStage = 1;
         const sky = document.getElementById('sky-sphere');
         const welcomeScreen = document.getElementById('welcome-screen');
@@ -236,7 +229,6 @@
         const fadeOverlay = document.getElementById('fade-overlay');
         const btsStar = document.getElementById('bts-star');
 
-        // Objetos de Audio
         const audios = {
             1: document.getElementById('audio-1'),
             2: document.getElementById('audio-2'),
@@ -269,7 +261,6 @@
             }, 600);
         }
 
-        // Iniciar Experiencia
         document.getElementById('start-btn').addEventListener('click', () => {
             welcomeScreen.style.opacity = '0';
             setTimeout(() => {
@@ -280,7 +271,6 @@
             playAudio(1);
         });
 
-        // Función para ejecutar la redirección a Cod.html
         function executeCod() {
             stopAllAudios();
             triggerFade(() => {
@@ -288,7 +278,6 @@
             });
         }
 
-        // Cambiar de ambiente
         function updateStage(newStage) {
             triggerFade(() => {
                 currentStage = newStage;
@@ -309,7 +298,7 @@
                     btsStar.setAttribute('visible', 'false');
                 } else if (currentStage === 3) {
                     sky.setAttribute('src', '#img-amb3');
-                    hudTitle.innerText = "AMBIENTE 3: 3.jpg - ¡Haz click en 'CLICK AQUÍ'!";
+                    hudTitle.innerText = "AMBIENTE 3: 3.jpg";
                     prevBtn.style.display = 'block';
                     nextBtn.style.display = 'none';
                     starBtn.style.display = 'block';
@@ -330,7 +319,6 @@
             else if (currentStage === 3) updateStage(2);
         });
 
-        // Eventos para ejecutar Cod.html
         starBtn.addEventListener('click', executeCod);
         btsStar.addEventListener('click', executeCod);
     </script>
