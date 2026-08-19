@@ -220,7 +220,6 @@
             <span class="song-tag">🎶 Reproduciendo: 4. Permission</span>
             <button class="bts-btn" id="restart-btn" style="padding: 8px 20px; font-size: 0.9rem;">🔄 REINICIAR</button>
         </div>
-        <!-- Renderiza directamente el archivo Cod.html -->
         <iframe id="cod-frame"></iframe>
     </div>
 
@@ -230,7 +229,8 @@
     <!-- Escena 360 con A-Frame -->
     <a-scene embedded vr-mode-ui="enabled: false" renderer="antialias: true">
         <a-assets>
-            <img id="img-amb1" src="1.png" crossorigin="anonymous">
+            <!-- Soporte dual PNG/JPG para la imagen 1 -->
+            <img id="img-amb1" src="1.png" crossorigin="anonymous" onerror="if(!this.dataset.fallback){this.dataset.fallback=true; this.src='1.jpg';}">
             <img id="img-amb2" src="2.jpg" crossorigin="anonymous">
             <img id="img-amb3" src="3.jpg" crossorigin="anonymous">
             <a-mixin id="star-spin" animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear"></a-mixin>
@@ -253,7 +253,7 @@
 
     <!-- Interfaz de Navegación -->
     <div id="ui-container">
-        <div class="hud-top" id="hud-title">AMBIENTE 1: 1.png</div>
+        <div class="hud-top" id="hud-title">AMBIENTE 1</div>
         <div class="hud-bottom">
             <button class="nav-btn" id="prev-btn" style="display: none;">ANTERIOR</button>
             <button class="nav-btn star-btn" id="star-btn" style="display: none;">⭐</button>
@@ -326,36 +326,33 @@
             playAudio(1);
         });
 
-        // Ejecutar "Cod.html" con la ruta con C mayúscula y reproducir "4. Permission"
+        // Ejecutar Cod.html
         function executeCod() {
             stopAllAudios();
             triggerFade(() => {
                 uiContainer.style.display = 'none';
                 codScreen.style.display = 'block';
-                
-                // Carga directa del archivo Cod.html (sensible a mayúsculas)
                 codFrame.src = "Cod.html";
 
                 setTimeout(() => {
                     codScreen.style.opacity = '1';
                 }, 50);
 
-                playAudio(4); // Reproduce "4. Permission"
+                playAudio(4);
             });
         }
 
-        // Botón Reiniciar disponible dentro de la pantalla de ejecución
+        // Botón Reiniciar
         restartBtn.addEventListener('click', () => {
             stopAllAudios();
             triggerFade(() => {
                 codScreen.style.opacity = '0';
                 codScreen.style.display = 'none';
-                codFrame.src = ""; // Detener la ejecución de Cod.html
+                codFrame.src = "";
 
-                // Regresar a Ambiente 1
                 currentStage = 1;
                 sky.setAttribute('src', '#img-amb1');
-                hudTitle.innerText = "AMBIENTE 1: 1.png";
+                hudTitle.innerText = "AMBIENTE 1";
                 prevBtn.style.display = 'none';
                 nextBtn.style.display = 'block';
                 starBtn.style.display = 'none';
@@ -373,7 +370,7 @@
                 
                 if (currentStage === 1) {
                     sky.setAttribute('src', '#img-amb1');
-                    hudTitle.innerText = "AMBIENTE 1: 1.png";
+                    hudTitle.innerText = "AMBIENTE 1";
                     prevBtn.style.display = 'none';
                     nextBtn.style.display = 'block';
                     starBtn.style.display = 'none';
@@ -408,7 +405,6 @@
             else if (currentStage === 3) updateStage(2);
         });
 
-        // Eventos para ejecutar el código "Cod"
         starBtn.addEventListener('click', executeCod);
         btsStar.addEventListener('click', executeCod);
     </script>
