@@ -148,7 +148,7 @@
             100% { transform: scale(1.12); box-shadow: 0 0 30px rgba(212, 165, 255, 1); }
         }
 
-        /* Pantalla Final integrativa "Cod" */
+        /* Escena de Ejecución del Código "COD" */
         #cod-screen {
             position: fixed;
             top: 0;
@@ -182,8 +182,15 @@
             font-size: 2rem;
             color: #d4a5ff;
             text-shadow: 0 0 15px rgba(212, 165, 255, 0.8);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             letter-spacing: 2px;
+        }
+
+        .cod-card .song-title {
+            font-size: 1rem;
+            color: #e0aaff;
+            margin-bottom: 20px;
+            font-style: italic;
         }
 
         .cod-card p {
@@ -217,11 +224,13 @@
         <button class="bts-btn" id="start-btn">INICIAR EXPERIENCIA</button>
     </div>
 
-    <!-- Pantalla Final integrativa "Cod" -->
+    <!-- Escena de Ejecución del Código "COD" -->
     <div id="cod-screen">
         <div class="cod-card">
-            <h2>¡EXPERIENCIA COMPLETADA!</h2>
-            <p>Has recorrido todos los ambientes 360° y activado la estrella especial de BTS.</p>
+            <h2>¡CÓDIGO EJECUTADO!</h2>
+            <div class="song-title">🎶 Reproduciendo: 4. Permission</div>
+            <p>Has activado el código interactivo y completado el recorrido 360° de BTS.</p>
+            <!-- Botón para reiniciar la experiencia dentro de la escena COD -->
             <button class="bts-btn" id="restart-btn">🔄 EMPEZAR DE NUEVO</button>
         </div>
     </div>
@@ -241,7 +250,7 @@
         <!-- Esfera que proyecta la imagen 360 -->
         <a-sky id="sky-sphere" src="#img-amb1" rotation="0 -90 0"></a-sky>
 
-        <!-- Estrella Interactiva 3D en Morado Claro (sin texto flotante) -->
+        <!-- Estrella Interactiva 3D en Morado Claro -->
         <a-entity id="bts-star" position="0 1.6 -3" visible="false">
             <a-entity mixin="star-spin">
                 <a-cone class="raycastable" position="0 0.5 0" rotation="180 0 0" radius-bottom="0.45" height="0.9" color="#c77dff" material="emissive: #9d4edd; emissiveIntensity: 0.9;"></a-cone>
@@ -270,6 +279,7 @@
     <audio id="audio-1" src="1 Butter1.mp3" preload="auto" loop></audio>
     <audio id="audio-2" src="2. DYNAMITE.mp3" preload="auto" loop></audio>
     <audio id="audio-3" src="3. Boy.mp3" preload="auto" loop></audio>
+    <audio id="audio-4" src="4. Permission.mp3" preload="auto" loop></audio>
 
     <script>
         let currentStage = 1;
@@ -288,7 +298,8 @@
         const audios = {
             1: document.getElementById('audio-1'),
             2: document.getElementById('audio-2'),
-            3: document.getElementById('audio-3')
+            3: document.getElementById('audio-3'),
+            4: document.getElementById('audio-4')
         };
 
         function stopAllAudios() {
@@ -317,7 +328,7 @@
             }, 600);
         }
 
-        // Iniciar Experiencia desde la pantalla de bienvenida
+        // Iniciar Experiencia
         document.getElementById('start-btn').addEventListener('click', () => {
             welcomeScreen.style.opacity = '0';
             setTimeout(() => {
@@ -328,7 +339,7 @@
             playAudio(1);
         });
 
-        // Transición a la pantalla final "Cod" dentro del mismo archivo
+        // Ejecución del Código "COD" + Reproducción de "4. Permission"
         function executeCod() {
             stopAllAudios();
             triggerFade(() => {
@@ -337,17 +348,18 @@
                 setTimeout(() => {
                     codScreen.style.opacity = '1';
                 }, 50);
+                playAudio(4); // Inicia la canción "4. Permission"
             });
         }
 
-        // Reiniciar la experiencia desde el inicio
+        // Reiniciar la experiencia desde el inicio (disponible en la escena COD)
         restartBtn.addEventListener('click', () => {
             stopAllAudios();
             triggerFade(() => {
                 codScreen.style.opacity = '0';
                 codScreen.style.display = 'none';
                 
-                // Reiniciar variables a Estado 1
+                // Reiniciar a Ambiente 1
                 currentStage = 1;
                 sky.setAttribute('src', '#img-amb1');
                 hudTitle.innerText = "AMBIENTE 1: 1.png";
@@ -403,7 +415,7 @@
             else if (currentStage === 3) updateStage(2);
         });
 
-        // Eventos para ejecutar la pantalla final
+        // Eventos al presionar el botón ⭐ o la estrella 3D
         starBtn.addEventListener('click', executeCod);
         btsStar.addEventListener('click', executeCod);
     </script>
