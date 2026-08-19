@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Experiencia 360° BTS</title>
-    <!-- Cargamos A-Frame para los panoramas 360 -->
+    <!-- Librería A-Frame para panoramas 360 -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <style>
         * {
@@ -75,7 +75,7 @@
             background: linear-gradient(45deg, #9d4edd, #c77dff);
         }
 
-        /* Interfaz UI Superior / Inferior */
+        /* Interfaz UI Navegación */
         #ui-container {
             position: fixed;
             top: 0;
@@ -132,7 +132,6 @@
             box-shadow: 0 0 15px #9d4edd;
         }
 
-        /* Estilo para el icono de la Estrella en Morado Claro */
         .star-btn {
             background: linear-gradient(45deg, #7b2cbf, #9d4edd) !important;
             border: 1px solid #d4a5ff !important;
@@ -148,59 +147,51 @@
             100% { transform: scale(1.12); box-shadow: 0 0 30px rgba(212, 165, 255, 1); }
         }
 
-        /* Escena de Ejecución del Código "COD" */
+        /* Escena de Ejecución Real del Código HTML "COD" */
         #cod-screen {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #0b0514, #1f1135, #4b1557);
+            width: 100vw;
+            height: 100vh;
+            background: #000;
             display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
             z-index: 9998;
-            padding: 20px;
-            text-align: center;
             opacity: 0;
             transition: opacity 0.8s ease;
         }
 
-        .cod-card {
-            max-width: 550px;
-            width: 90%;
-            background: rgba(20, 10, 35, 0.75);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(212, 165, 255, 0.3);
-            border-radius: 20px;
-            padding: 40px 30px;
-            box-shadow: 0 0 35px rgba(157, 78, 221, 0.5);
+        /* Renderizador Frame para ejecutar el HTML externo o embebido */
+        #cod-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
-        .cod-card h2 {
-            font-size: 2rem;
-            color: #d4a5ff;
-            text-shadow: 0 0 15px rgba(212, 165, 255, 0.8);
-            margin-bottom: 15px;
-            letter-spacing: 2px;
+        /* Barra flotante sobre la ejecución del código */
+        .cod-overlay-ui {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(15, 10, 25, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 40px;
+            border: 1px solid rgba(212, 165, 255, 0.4);
+            box-shadow: 0 0 20px rgba(157, 78, 221, 0.4);
         }
 
-        .cod-card .song-title {
-            font-size: 1rem;
+        .cod-overlay-ui .song-tag {
+            font-size: 0.9rem;
             color: #e0aaff;
-            margin-bottom: 20px;
-            font-style: italic;
+            font-weight: 500;
         }
 
-        .cod-card p {
-            font-size: 1.1rem;
-            color: #e0e0e0;
-            line-height: 1.6;
-            margin-bottom: 35px;
-        }
-
-        /* Transición de fundido (Fade) */
+        /* Capa de Transición (Fade) */
         #fade-overlay {
             position: fixed;
             top: 0;
@@ -224,21 +215,20 @@
         <button class="bts-btn" id="start-btn">INICIAR EXPERIENCIA</button>
     </div>
 
-    <!-- Escena de Ejecución del Código "COD" -->
+    <!-- Escena donde se Ejecuta el Código HTML "COD" -->
     <div id="cod-screen">
-        <div class="cod-card">
-            <h2>¡CÓDIGO EJECUTADO!</h2>
-            <div class="song-title">🎶 Reproduciendo: 4. Permission</div>
-            <p>Has activado el código interactivo y completado el recorrido 360° de BTS.</p>
-            <!-- Botón para reiniciar la experiencia dentro de la escena COD -->
-            <button class="bts-btn" id="restart-btn">🔄 EMPEZAR DE NUEVO</button>
+        <div class="cod-overlay-ui">
+            <span class="song-tag">🎶 Reproduciendo: 4. Permission</span>
+            <button class="bts-btn" id="restart-btn" style="padding: 8px 20px; font-size: 0.9rem;">🔄 REINICIAR</button>
         </div>
+        <!-- Iframe ejecutante del archivo HTML 'cod.html' (o código incrustado) -->
+        <iframe id="cod-frame" src="cod.html"></iframe>
     </div>
 
     <!-- Capa de Transición Visual -->
     <div id="fade-overlay"></div>
 
-    <!-- Contenedor de la Escena 360 con A-Frame -->
+    <!-- Escena 360 con A-Frame -->
     <a-scene embedded vr-mode-ui="enabled: false" renderer="antialias: true">
         <a-assets>
             <img id="img-amb1" src="1.png" crossorigin="anonymous">
@@ -247,10 +237,9 @@
             <a-mixin id="star-spin" animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear"></a-mixin>
         </a-assets>
 
-        <!-- Esfera que proyecta la imagen 360 -->
         <a-sky id="sky-sphere" src="#img-amb1" rotation="0 -90 0"></a-sky>
 
-        <!-- Estrella Interactiva 3D en Morado Claro -->
+        <!-- Estrella 3D interactiva -->
         <a-entity id="bts-star" position="0 1.6 -3" visible="false">
             <a-entity mixin="star-spin">
                 <a-cone class="raycastable" position="0 0.5 0" rotation="180 0 0" radius-bottom="0.45" height="0.9" color="#c77dff" material="emissive: #9d4edd; emissiveIntensity: 0.9;"></a-cone>
@@ -259,13 +248,12 @@
             </a-entity>
         </a-entity>
 
-        <!-- Cámara con raycaster activo -->
         <a-entity camera look-controls="pointerLockEnabled: false" position="0 1.6 0">
             <a-entity cursor="fuse: false; rayOrigin: mouse" raycaster="objects: .raycastable"></a-entity>
         </a-entity>
     </a-scene>
 
-    <!-- Interfaz de Usuario (HUD) -->
+    <!-- Interfaz de Navegación -->
     <div id="ui-container">
         <div class="hud-top" id="hud-title">AMBIENTE 1: 1.png</div>
         <div class="hud-bottom">
@@ -275,7 +263,7 @@
         </div>
     </div>
 
-    <!-- Elementos de Audio -->
+    <!-- Audios -->
     <audio id="audio-1" src="1 Butter1.mp3" preload="auto" loop></audio>
     <audio id="audio-2" src="2. DYNAMITE.mp3" preload="auto" loop></audio>
     <audio id="audio-3" src="3. Boy.mp3" preload="auto" loop></audio>
@@ -286,6 +274,7 @@
         const sky = document.getElementById('sky-sphere');
         const welcomeScreen = document.getElementById('welcome-screen');
         const codScreen = document.getElementById('cod-screen');
+        const codFrame = document.getElementById('cod-frame');
         const uiContainer = document.getElementById('ui-container');
         const hudTitle = document.getElementById('hud-title');
         const nextBtn = document.getElementById('next-btn');
@@ -314,7 +303,7 @@
         function playAudio(stage) {
             stopAllAudios();
             if(audios[stage]) {
-                audios[stage].play().catch(e => console.log("Audio autoplay waiting user action", e));
+                audios[stage].play().catch(e => console.log("Esperando interacción de usuario para audio", e));
             }
         }
 
@@ -328,7 +317,7 @@
             }, 600);
         }
 
-        // Iniciar Experiencia
+        // Iniciar
         document.getElementById('start-btn').addEventListener('click', () => {
             welcomeScreen.style.opacity = '0';
             setTimeout(() => {
@@ -339,27 +328,33 @@
             playAudio(1);
         });
 
-        // Ejecución del Código "COD" + Reproducción de "4. Permission"
+        // Función para ejecutar el código HTML "COD" + iniciar "4. Permission"
         function executeCod() {
             stopAllAudios();
             triggerFade(() => {
                 uiContainer.style.display = 'none';
-                codScreen.style.display = 'flex';
+                codScreen.style.display = 'block';
+                
+                // Recargar/reproducir el frame con el archivo HTML ejecutables 'cod.html'
+                codFrame.src = "cod.html";
+
                 setTimeout(() => {
                     codScreen.style.opacity = '1';
                 }, 50);
+
                 playAudio(4); // Inicia la canción "4. Permission"
             });
         }
 
-        // Reiniciar la experiencia desde el inicio (disponible en la escena COD)
+        // Botón Reiniciar dentro de la escena de código ejecutado
         restartBtn.addEventListener('click', () => {
             stopAllAudios();
             triggerFade(() => {
                 codScreen.style.opacity = '0';
                 codScreen.style.display = 'none';
-                
-                // Reiniciar a Ambiente 1
+                codFrame.src = ""; // Detener ejecución del iframe
+
+                // Reset a Ambiente 1
                 currentStage = 1;
                 sky.setAttribute('src', '#img-amb1');
                 hudTitle.innerText = "AMBIENTE 1: 1.png";
@@ -373,7 +368,7 @@
             });
         });
 
-        // Cambiar de ambiente
+        // Transición de Ambientes 360°
         function updateStage(newStage) {
             triggerFade(() => {
                 currentStage = newStage;
@@ -415,7 +410,7 @@
             else if (currentStage === 3) updateStage(2);
         });
 
-        // Eventos al presionar el botón ⭐ o la estrella 3D
+        // Disparadores para ejecutar el código HTML al pulsar la estrella
         starBtn.addEventListener('click', executeCod);
         btsStar.addEventListener('click', executeCod);
     </script>
