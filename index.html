@@ -229,8 +229,8 @@
     <!-- Escena 360 con A-Frame -->
     <a-scene embedded vr-mode-ui="enabled: false" renderer="antialias: true">
         <a-assets>
-            <!-- Soporte dual PNG/JPG para la imagen 1 -->
-            <img id="img-amb1" src="1.png" crossorigin="anonymous" onerror="if(!this.dataset.fallback){this.dataset.fallback=true; this.src='1.jpg';}">
+            <!-- Actualizado a 1.jpg -->
+            <img id="img-amb1" src="1.jpg" crossorigin="anonymous">
             <img id="img-amb2" src="2.jpg" crossorigin="anonymous">
             <img id="img-amb3" src="3.jpg" crossorigin="anonymous">
             <a-mixin id="star-spin" animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear"></a-mixin>
@@ -253,7 +253,7 @@
 
     <!-- Interfaz de Navegación -->
     <div id="ui-container">
-        <div class="hud-top" id="hud-title">AMBIENTE 1</div>
+        <div class="hud-top" id="hud-title">AMBIENTE 1: 1.jpg</div>
         <div class="hud-bottom">
             <button class="nav-btn" id="prev-btn" style="display: none;">ANTERIOR</button>
             <button class="nav-btn star-btn" id="star-btn" style="display: none;">⭐</button>
@@ -352,7 +352,7 @@
 
                 currentStage = 1;
                 sky.setAttribute('src', '#img-amb1');
-                hudTitle.innerText = "AMBIENTE 1";
+                hudTitle.innerText = "AMBIENTE 1: 1.jpg";
                 prevBtn.style.display = 'none';
                 nextBtn.style.display = 'block';
                 starBtn.style.display = 'none';
@@ -370,7 +370,7 @@
                 
                 if (currentStage === 1) {
                     sky.setAttribute('src', '#img-amb1');
-                    hudTitle.innerText = "AMBIENTE 1";
+                    hudTitle.innerText = "AMBIENTE 1: 1.jpg";
                     prevBtn.style.display = 'none';
                     nextBtn.style.display = 'block';
                     starBtn.style.display = 'none';
