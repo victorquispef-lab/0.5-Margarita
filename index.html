@@ -22,7 +22,7 @@
             color: #fff;
         }
 
-        /* Pantalla de Bienvenida (Autoplay fix) */
+        /* Pantalla de Bienvenida */
         #welcome-screen {
             position: fixed;
             top: 0;
@@ -148,6 +148,51 @@
             100% { transform: scale(1.12); box-shadow: 0 0 30px rgba(212, 165, 255, 1); }
         }
 
+        /* Pantalla Final integrativa "Cod" */
+        #cod-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0b0514, #1f1135, #4b1557);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9998;
+            padding: 20px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .cod-card {
+            max-width: 550px;
+            width: 90%;
+            background: rgba(20, 10, 35, 0.75);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(212, 165, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 0 35px rgba(157, 78, 221, 0.5);
+        }
+
+        .cod-card h2 {
+            font-size: 2rem;
+            color: #d4a5ff;
+            text-shadow: 0 0 15px rgba(212, 165, 255, 0.8);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .cod-card p {
+            font-size: 1.1rem;
+            color: #e0e0e0;
+            line-height: 1.6;
+            margin-bottom: 35px;
+        }
+
         /* Transición de fundido (Fade) */
         #fade-overlay {
             position: fixed;
@@ -158,7 +203,7 @@
             background: #000;
             opacity: 0;
             pointer-events: none;
-            z-index: 999;
+            z-index: 10000;
             transition: opacity 0.6s ease;
         }
     </style>
@@ -170,6 +215,15 @@
         <h1>BTS 360° EXPERIENCE</h1>
         <p>Prepárate para un recorrido inmersivo</p>
         <button class="bts-btn" id="start-btn">INICIAR EXPERIENCIA</button>
+    </div>
+
+    <!-- Pantalla Final integrativa "Cod" -->
+    <div id="cod-screen">
+        <div class="cod-card">
+            <h2>¡EXPERIENCIA COMPLETADA!</h2>
+            <p>Has recorrido todos los ambientes 360° y activado la estrella especial de BTS.</p>
+            <button class="bts-btn" id="restart-btn">🔄 EMPEZAR DE NUEVO</button>
+        </div>
     </div>
 
     <!-- Capa de Transición Visual -->
@@ -187,7 +241,7 @@
         <!-- Esfera que proyecta la imagen 360 -->
         <a-sky id="sky-sphere" src="#img-amb1" rotation="0 -90 0"></a-sky>
 
-        <!-- Estrella Interactiva 3D en Morado Claro -->
+        <!-- Estrella Interactiva 3D en Morado Claro (sin texto flotante) -->
         <a-entity id="bts-star" position="0 1.6 -3" visible="false">
             <a-entity mixin="star-spin">
                 <a-cone class="raycastable" position="0 0.5 0" rotation="180 0 0" radius-bottom="0.45" height="0.9" color="#c77dff" material="emissive: #9d4edd; emissiveIntensity: 0.9;"></a-cone>
@@ -221,11 +275,13 @@
         let currentStage = 1;
         const sky = document.getElementById('sky-sphere');
         const welcomeScreen = document.getElementById('welcome-screen');
+        const codScreen = document.getElementById('cod-screen');
         const uiContainer = document.getElementById('ui-container');
         const hudTitle = document.getElementById('hud-title');
         const nextBtn = document.getElementById('next-btn');
         const prevBtn = document.getElementById('prev-btn');
         const starBtn = document.getElementById('star-btn');
+        const restartBtn = document.getElementById('restart-btn');
         const fadeOverlay = document.getElementById('fade-overlay');
         const btsStar = document.getElementById('bts-star');
 
@@ -261,6 +317,7 @@
             }, 600);
         }
 
+        // Iniciar Experiencia desde la pantalla de bienvenida
         document.getElementById('start-btn').addEventListener('click', () => {
             welcomeScreen.style.opacity = '0';
             setTimeout(() => {
@@ -271,13 +328,40 @@
             playAudio(1);
         });
 
+        // Transición a la pantalla final "Cod" dentro del mismo archivo
         function executeCod() {
             stopAllAudios();
             triggerFade(() => {
-                window.location.href = "Cod.html";
+                uiContainer.style.display = 'none';
+                codScreen.style.display = 'flex';
+                setTimeout(() => {
+                    codScreen.style.opacity = '1';
+                }, 50);
             });
         }
 
+        // Reiniciar la experiencia desde el inicio
+        restartBtn.addEventListener('click', () => {
+            stopAllAudios();
+            triggerFade(() => {
+                codScreen.style.opacity = '0';
+                codScreen.style.display = 'none';
+                
+                // Reiniciar variables a Estado 1
+                currentStage = 1;
+                sky.setAttribute('src', '#img-amb1');
+                hudTitle.innerText = "AMBIENTE 1: 1.png";
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'block';
+                starBtn.style.display = 'none';
+                btsStar.setAttribute('visible', 'false');
+                
+                uiContainer.style.display = 'block';
+                playAudio(1);
+            });
+        });
+
+        // Cambiar de ambiente
         function updateStage(newStage) {
             triggerFade(() => {
                 currentStage = newStage;
@@ -319,6 +403,7 @@
             else if (currentStage === 3) updateStage(2);
         });
 
+        // Eventos para ejecutar la pantalla final
         starBtn.addEventListener('click', executeCod);
         btsStar.addEventListener('click', executeCod);
     </script>
