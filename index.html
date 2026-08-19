@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiencia 360° BTS</title>
+    <!-- Cargamos A-Frame para los panoramas 360 -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0b0b0b;
+            color: #fff;
+        }
+
+        /* Pantalla de Bienvenida (Autoplay fix) */
+        #welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1f1135, #4b1557, #111);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease;
+        }
+
+        #welcome-screen h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            color: #d4a5ff;
+            text-shadow: 0 0 15px rgba(212, 165, 255, 0.6);
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        #welcome-screen p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            color: #ccc;
+            letter-spacing: 1px;
+        }
+
+        .bts-btn {
+            background: linear-gradient(45deg, #7b2cbf, #9d4edd);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(157, 78, 221, 0.7);
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+
+        .bts-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(157, 78, 221, 1);
+            background: linear-gradient(45deg, #9d4edd, #c77dff);
+        }
+
+        /* Interfaz UI Superior / Inferior */
+        #ui-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: none;
+        }
+
+        .hud-top {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 10px 25px;
+            border-radius: 30px;
+            border: 1px solid rgba(212, 165, 255, 0.3);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            color: #e0aaff;
+        }
+
+        .hud-bottom {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            pointer-events: auto;
+        }
+
+        .nav-btn {
+            background: rgba(30, 10, 50, 0.8);
+            color: #fff;
+            border: 1px solid #9d4edd;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            letter-spacing: 1px;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .nav-btn:hover {
+            background: #9d4edd;
+            box-shadow: 0 0 15px #9d4edd;
+        }
+
+        /* Transición de fundido (Fade) */
+        #fade-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 999;
+            transition: opacity 0.6s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Pantalla de Bienvenida para evitar bloqueo de Audio -->
+    <div id="welcome-screen">
+        <h1>BTS 360° EXPERIENCE</h1>
+        <p>Prepárate para un recorrido inmersivo</p>
+        <button class="bts-btn" id="start-btn">INICIAR EXPERIENCIA</button>
+    </div>
+
+    <!-- Capa de Transición Visual -->
+    <div id="fade-overlay"></div>
+
+    <!-- Contenedor de la Escena 360 con A-Frame -->
+    <a-scene embedded vr-mode-ui="enabled: false" renderer="antialias: true">
+        <a-assets>
+            <!-- Imágenes panorámicas exactamente respetando nombres -->
+            <img id="img-amb1" src="1.png" crossorigin="anonymous">
+            <img id="img-amb2" src="2.jpg" crossorigin="anonymous">
+            <img id="img-amb3" src="3.jpg" crossorigin="anonymous">
+        </a-assets>
+
+        <!-- Esfera que proyecta la imagen 360 sin deformar -->
+        <a-sky id="sky-sphere" src="#img-amb1" rotation="0 -90 0"></a-sky>
+
+        <!-- Cámara con controles de mouse y táctil -->
+        <a-entity camera look-controls="pointerLockEnabled: false" position="0 1.6 0">
+            <!-- Estrella Interactiva en el tercer ambiente (inicialmente oculta) -->
+            <a-entity id="bts-star" position="0 0 -5" visible="false" class="raycastable">
+                <!-- Geometría de estrella compuesta o plano con textura estilizada de estrella BTS -->
+                <a-mixin id="star-spin" animation="property: rotation; to: 0 360 0; loop: true; dur: 6000; easing: linear"></a-mixin>
+                <a-entity mixin="star-spin">
+                    <!-- Figura geométrica estilizada como estrella moderna brillante -->
+                    <a-cone position="0 0.5 0" rotation="180 0 0" radius-bottom="0.4" height="0.8" color="#c77dff" material="emissive: #9d4edd; emissiveIntensity: 0.8;"></a-cone>
+                    <a-cone position="0 -0.5 0" rotation="0 0 0" radius-bottom="0.4" height="0.8" color="#c77dff" material="emissive: #9d4edd; emissiveIntensity: 0.8;"></a-cone>
+                    <!-- Anillo brillante exterior -->
+                    <a-ring radius-inner="0.6" radius-outer="0.7" rotation="90 0 0" color="#e0aaff" material="side: double; emissive: #e0aaff; emissiveIntensity: 1;"></a-ring>
+                </a-entity>
+            </a-entity>
+        </a-entity>
+
+        <!-- Cursor para interacción en pantalla táctil y PC -->
+        <a-entity cursor="fuse: false; rayOrigin: mouse" raycaster="objects: .raycastable"></a-entity>
+    </a-scene>
+
+    <!-- Interfaz de Usuario (HUD) -->
+    <div id="ui-container">
+        <div class="hud-top" id="hud-title">AMBIENTE 1: 1.png</div>
+        <div class="hud-bottom">
+            <button class="nav-btn" id="prev-btn" style="display: none;">ANTERIOR</button>
+            <button class="nav-btn" id="next-btn">SIGUIENTE AMBIENTE</button>
+        </div>
+    </div>
+
+    <!-- Elementos de Audio (Exactamente los nombres solicitados) -->
+    <audio id="audio-1" src="1 Butter1.mp3" preload="auto" loop></audio>
+    <audio id="audio-2" src="2. DYNAMITE.mp3" preload="auto" loop></audio>
+    <audio id="audio-3" src="3. Boy.mp3" preload="auto" loop></audio>
+
+    <script>
+        // Variables de Control
+        let currentStage = 1;
+        const sky = document.getElementById('sky-sphere');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const uiContainer = document.getElementById('ui-container');
+        const hudTitle = document.getElementById('hud-title');
+        const nextBtn = document.getElementById('next-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const fadeOverlay = document.getElementById('fade-overlay');
+        const btsStar = document.getElementById('bts-star');
+
+        // Objetos de Audio
+        const audios = {
+            1: document.getElementById('audio-1'),
+            2: document.getElementById('audio-2'),
+            3: document.getElementById('audio-3')
+        };
+
+        function stopAllAudios() {
+            Object.values(audios).forEach(audio => {
+                audio.pause();
+                audio.currentTime = 0;
+            });
+        }
+
+        function playAudio(stage) {
+            stopAllAudios();
+            if(audios[stage]) {
+                audios[stage].play().catch(e => console.log("Audio autoplay prevented or waiting user action", e));
+            }
+        }
+
+        function triggerFade(callback) {
+            fadeOverlay.style.opacity = '1';
+            setTimeout(() => {
+                callback();
+                setTimeout(() => {
+                    fadeOverlay.style.opacity = '0';
+                }, 300);
+            }, 600);
+        }
+
+        // Iniciar Experiencia desde la pantalla de bienvenida
+        document.getElementById('start-btn').addEventListener('click', () => {
+            welcomeScreen.style.opacity = '0';
+            setTimeout(() => {
+                welcomeScreen.style.display = 'none';
+                uiContainer.style.display = 'block';
+            }, 800);
+            
+            playAudio(1);
+        });
+
+        // Cambiar de ambiente
+        function updateStage(newStage) {
+            triggerFade(() => {
+                currentStage = newStage;
+                
+                if (currentStage === 1) {
+                    sky.setAttribute('src', '#img-amb1');
+                    hudTitle.innerText = "AMBIENTE 1: 1.png";
+                    prevBtn.style.display = 'none';
+                    nextBtn.style.display = 'block';
+                    nextBtn.innerText = "SIGUIENTE AMBIENTE";
+                    btsStar.setAttribute('visible', 'false');
+                } else if (currentStage === 2) {
+                    sky.setAttribute('src', '#img-amb2');
+                    hudTitle.innerText = "AMBIENTE 2: 2.jpg";
+                    prevBtn.style.display = 'block';
+                    nextBtn.style.display = 'block';
+                    nextBtn.innerText = "SIGUIENTE AMBIENTE";
+                    btsStar.setAttribute('visible', 'false');
+                } else if (currentStage === 3) {
+                    sky.setAttribute('src', '#img-amb3');
+                    hudTitle.innerText = "AMBIENTE 3: 3.jpg (¡Busca la estrella!)";
+                    prevBtn.style.display = 'block';
+                    nextBtn.style.display = 'none'; // Ocultamos botón normal para dar paso a la estrella
+                    // Mostramos la estrella especial flotando en el espacio 360
+                    btsStar.setAttribute('visible', 'true');
+                }
+                
+                playAudio(currentStage);
+            });
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentStage === 1) {
+                updateStage(2);
+            } else if (currentStage === 2) {
+                updateStage(3);
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentStage === 2) {
+                updateStage(1);
+            } else if (currentStage === 3) {
+                updateStage(2);
+            }
+        });
+
+        // Acción al hacer clic / tocar la estrella especial de BTS en el ambiente 3
+        btsStar.addEventListener('click', () => {
+            if (currentStage === 3) {
+                // Detener completamente la música del ambiente 3
+                stopAllAudios();
+                
+                // Transición fluida y redirección a Cod.html
+                triggerFade(() => {
+                    window.location.href = "Cod.html";
+                });
+            }
+        });
+    </script>
+</body>
+</html>

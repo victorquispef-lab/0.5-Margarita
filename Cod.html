@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>¡Feliz Cumpleaños Margarita!</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #020005;
+      font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+    }
+
+    canvas {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="universe"></canvas>
+
+  <script>
+    const canvas = document.getElementById('universe');
+    const ctx = canvas.getContext('2d');
+
+    let width, height, centerX, centerY;
+    let mouseX = 0, mouseY = 0;
+    const tiltAngle = 1.15; // Ángulo de inclinación de la galaxia
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      centerX = width / 2;
+      centerY = height / 2;
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Interactividad leve con el ratón o pantalla táctil
+    window.addEventListener('mousemove', (e) => {
+      mouseX = (e.clientX - centerX) / centerX;
+      mouseY = (e.clientY - centerY) / centerY;
+    });
+
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        mouseX = (e.touches[0].clientX - centerX) / centerX;
+        mouseY = (e.touches[0].clientY - centerY) / centerY;
+      }
+    });
+
+    // Tonalidades moradas, rosadas y blancas
+    const colors = [
+      '#ffffff', '#f7aef8', '#f3c4fb', 
+      '#ff007f', '#ff69b4', '#da70d6', 
+      '#ba55d3', '#8a2be2', '#c8b6ff'
+    ];
+
+    // Configuración de tiempos más rápida y dinámica
+    const DURATION_SWIRL = 6000;    // 6s de Galaxia/Remolino (Antes era 10s)
+    const DURATION_COLLAPSE = 1200;  // 1.2s de Colapso (Antes era 1.8s)
+    const DURATION_EXPLODE = 4800;   // 4.8s de Explosión y Mensaje
+    const TOTAL_CYCLE = DURATION_SWIRL + DURATION_COLLAPSE + DURATION_EXPLODE;
+    
+    const NUM_PARTICLES = 850; // Cantidad equilibrada para rendimiento perfecto
+    const FOV = 350;
+
+    let startTime = Date.now();
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.r = Math.pow(Math.random(), 0.6) * Math.max(width, height) * 0.45 + 15;
+        this.theta = Math.random() * Math.PI * 2;
+        this.speed = (0.02 + (1 / (this.r + 20)) * 2);
+        this.yDisk = (Math.random() - 0.5) * (25 + this.r * 0.08);
+
+        this.size = Math.random() * 2.2 + 0.8;
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.baseAlpha = Math.random() * 0.7 + 0.3;
+
+        this.x3d = 0;
+        this.y3d = 0;
+        this.z3d = 0;
+
+        this.screenX = 0;
+        this.screenY = 0;
+        this.scale = 1;
+
+        this.vx = 0;
+        this.vy = 0;
+        this.vz = 0;
+        this.exploded = false;
+      }
+
+      update(elapsed) {
+        const currentTilt = tiltAngle + mouseY * 0.15;
+
+        if (elapsed < DURATION_SWIRL) {
+          // FASE 1: REMOLINO
+          this.theta += this.speed;
+          this.r -= 0.08;
+          if (this.r < 10) this.r = Math.max(width, height) * 0.45;
+
+          const rawX = this.r * Math.cos(this.theta);
+          const rawZ = this.r * Math.sin(this.theta);
+          const rawY = this.yDisk;
+
+          this.x3d = rawX;
+          this.y3d = rawY * Math.cos(currentTilt) - rawZ * Math.sin(currentTilt);
+          this.z3d = rawY * Math.sin(currentTilt) + rawZ * Math.cos(currentTilt);
+          this.exploded = false;
+
+        } else if (elapsed < DURATION_SWIRL + DURATION_COLLAPSE) {
+          // FASE 2: COLAPSO RÁPIDO
+          const progress = (elapsed - DURATION_SWIRL) / DURATION_COLLAPSE;
+          
+          this.r *= 0.88;
+          this.theta += this.speed * (1 + progress * 8);
+
+          const rawX = this.r * Math.cos(this.theta);
+          const rawZ = this.r * Math.sin(this.theta);
+          const rawY = this.yDisk * (1 - progress);
+
+          this.x3d = rawX;
+          this.y3d = rawY * Math.cos(currentTilt) - rawZ * Math.sin(currentTilt);
+          this.z3d = rawY * Math.sin(currentTilt) + rawZ * Math.cos(currentTilt);
+
+          if (progress > 0.92 && !this.exploded) {
+            // Explosión omnidireccional 360°
+            const u = Math.random();
+            const v = Math.random();
+            const phi = Math.acos(2 * v - 1);
+            const lambda = 2 * Math.PI * u;
+            const force = Math.random() * 15 + 4;
+
+            this.vx = force * Math.sin(phi) * Math.cos(lambda);
+            this.vy = force * Math.sin(phi) * Math.sin(lambda);
+            this.vz = force * Math.cos(phi);
+
+            this.x3d = 0;
+            this.y3d = 0;
+            this.z3d = 0;
+            this.exploded = true;
+          }
+
+        } else {
+          // FASE 3: EXPLOSIÓN
+          this.x3d += this.vx;
+          this.y3d += this.vy;
+          this.z3d += this.vz;
+
+          this.vx *= 0.95;
+          this.vy *= 0.95;
+          this.vz *= 0.95;
+        }
+
+        // Proyección Perspectiva 3D
+        const dynamicCenterX = centerX + mouseX * 20;
+        const dynamicCenterY = centerY + mouseY * 20;
+
+        this.scale = FOV / (FOV + this.z3d + 200);
+        this.screenX = dynamicCenterX + this.x3d * this.scale;
+        this.screenY = dynamicCenterY + this.y3d * this.scale;
+      }
+
+      draw() {
+        if (this.scale <= 0) return;
+
+        const renderSize = Math.max(0.3, this.size * this.scale);
+        const depthAlpha = Math.min(1, Math.max(0.1, this.baseAlpha * this.scale));
+
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = depthAlpha;
+        ctx.beginPath();
+        ctx.arc(this.screenX, this.screenY, renderSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    const particles = Array.from({ length: NUM_PARTICLES }, () => new Particle());
+
+    function drawText(alpha) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const fontSize = Math.min(width * 0.065, 60);
+      ctx.font = `bold ${fontSize}px 'Montserrat', sans-serif`;
+
+      // Aplica brillo solo al texto para máximo rendimiento
+      ctx.shadowColor = '#ff007f';
+      ctx.shadowBlur = 25;
+
+      const gradient = ctx.createLinearGradient(
+        centerX - 200, centerY, 
+        centerX + 200, centerY
+      );
+      gradient.addColorStop(0, '#ffffff');
+      gradient.addColorStop(0.3, '#f7aef8');
+      gradient.addColorStop(0.7, '#da70d6');
+      gradient.addColorStop(1, '#ffffff');
+
+      ctx.fillStyle = gradient;
+      
+      ctx.fillText('¡Feliz Cumpleaños!', centerX, centerY - fontSize * 0.6);
+      
+      ctx.shadowColor = '#8a2be2';
+      ctx.shadowBlur = 30;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('Margarita', centerX, centerY + fontSize * 0.7);
+
+      ctx.restore();
+    }
+
+    function animate() {
+      const now = Date.now();
+      const elapsed = (now - startTime) % TOTAL_CYCLE;
+
+      if (now - startTime >= TOTAL_CYCLE) {
+        startTime = now;
+        particles.forEach(p => p.reset());
+      }
+
+      // Limpieza de pantalla con rastro estelar
+      ctx.fillStyle = 'rgba(2, 0, 5, 0.28)';
+      ctx.fillRect(0, 0, width, height);
+
+      // Fusión de luz ultrarrápida sin lag
+      ctx.globalCompositeOperation = 'lighter';
+
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update(elapsed);
+        particles[i].draw();
+      }
+
+      ctx.globalCompositeOperation = 'source-over';
+
+      // Transición del mensaje
+      if (elapsed >= DURATION_SWIRL + DURATION_COLLAPSE) {
+        const textElapsed = elapsed - (DURATION_SWIRL + DURATION_COLLAPSE);
+        let textAlpha = 0;
+
+        if (textElapsed < 600) {
+          textAlpha = textElapsed / 600;
+        } else if (textElapsed > DURATION_EXPLODE - 600) {
+          textAlpha = (DURATION_EXPLODE - textElapsed) / 600;
+        } else {
+          textAlpha = 1;
+        }
+
+        drawText(Math.max(0, Math.min(1, textAlpha)));
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
