@@ -100,6 +100,7 @@
             font-size: 0.9rem;
             letter-spacing: 2px;
             color: #e0aaff;
+            text-align: center;
         }
 
         .hud-bottom {
@@ -129,6 +130,19 @@
         .nav-btn:hover {
             background: #9d4edd;
             box-shadow: 0 0 15px #9d4edd;
+        }
+
+        /* Estilo para el botón especial de Estrella / Cod */
+        .star-btn {
+            background: linear-gradient(45deg, #ff007f, #7b2cbf) !important;
+            border: 1px solid #ff77e9 !important;
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.8) !important;
+            animation: pulseStar 1.5s infinite alternate;
+        }
+
+        @keyframes pulseStar {
+            0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 0, 127, 0.6); }
+            100% { transform: scale(1.08); box-shadow: 0 0 30px rgba(255, 0, 127, 1); }
         }
 
         /* Transición de fundido (Fade) */
@@ -165,29 +179,29 @@
             <img id="img-amb1" src="1.png" crossorigin="anonymous">
             <img id="img-amb2" src="2.jpg" crossorigin="anonymous">
             <img id="img-amb3" src="3.jpg" crossorigin="anonymous">
+            <!-- Mixin de animación declarado correctamente en a-assets -->
+            <a-mixin id="star-spin" animation="property: rotation; to: 0 360 0; loop: true; dur: 6000; easing: linear"></a-mixin>
         </a-assets>
 
         <!-- Esfera que proyecta la imagen 360 sin deformar -->
         <a-sky id="sky-sphere" src="#img-amb1" rotation="0 -90 0"></a-sky>
 
-        <!-- Cámara con controles de mouse y táctil -->
-        <a-entity camera look-controls="pointerLockEnabled: false" position="0 1.6 0">
-            <!-- Estrella Interactiva en el tercer ambiente (inicialmente oculta) -->
-            <a-entity id="bts-star" position="0 0 -5" visible="false" class="raycastable">
-                <!-- Geometría de estrella compuesta o plano con textura estilizada de estrella BTS -->
-                <a-mixin id="star-spin" animation="property: rotation; to: 0 360 0; loop: true; dur: 6000; easing: linear"></a-mixin>
-                <a-entity mixin="star-spin">
-                    <!-- Figura geométrica estilizada como estrella moderna brillante -->
-                    <a-cone position="0 0.5 0" rotation="180 0 0" radius-bottom="0.4" height="0.8" color="#c77dff" material="emissive: #9d4edd; emissiveIntensity: 0.8;"></a-cone>
-                    <a-cone position="0 -0.5 0" rotation="0 0 0" radius-bottom="0.4" height="0.8" color="#c77dff" material="emissive: #9d4edd; emissiveIntensity: 0.8;"></a-cone>
-                    <!-- Anillo brillante exterior -->
-                    <a-ring radius-inner="0.6" radius-outer="0.7" rotation="90 0 0" color="#e0aaff" material="side: double; emissive: #e0aaff; emissiveIntensity: 1;"></a-ring>
-                </a-entity>
+        <!-- Estrella Interactiva 3D colocada en el escenario -->
+        <a-entity id="bts-star" position="0 1.6 -4" visible="false">
+            <a-entity mixin="star-spin">
+                <!-- Figura geométrica estilizada como estrella brillante -->
+                <a-cone class="raycastable" position="0 0.5 0" rotation="180 0 0" radius-bottom="0.4" height="0.8" color="#c77dff" material="emissive: #9d4edd; emissiveIntensity: 0.8;"></a-cone>
+                <a-cone class="raycastable" position="0 -0.5 0" rotation="0 0 0" radius-bottom="0.4" height="0.8" color="#c77dff" material="emissive: #9d4edd; emissiveIntensity: 0.8;"></a-cone>
+                <!-- Anillo brillante exterior -->
+                <a-ring class="raycastable" radius-inner="0.6" radius-outer="0.7" rotation="90 0 0" color="#e0aaff" material="side: double; emissive: #e0aaff; emissiveIntensity: 1;"></a-ring>
             </a-entity>
         </a-entity>
 
-        <!-- Cursor para interacción en pantalla táctil y PC -->
-        <a-entity cursor="fuse: false; rayOrigin: mouse" raycaster="objects: .raycastable"></a-entity>
+        <!-- Cámara con controles de mouse y táctil -->
+        <a-entity camera look-controls="pointerLockEnabled: false" position="0 1.6 0">
+            <!-- Raycaster para detección de clics en objetos 3D -->
+            <a-entity cursor="fuse: false; rayOrigin: mouse" raycaster="objects: .raycastable"></a-entity>
+        </a-entity>
     </a-scene>
 
     <!-- Interfaz de Usuario (HUD) -->
@@ -195,6 +209,7 @@
         <div class="hud-top" id="hud-title">AMBIENTE 1: 1.png</div>
         <div class="hud-bottom">
             <button class="nav-btn" id="prev-btn" style="display: none;">ANTERIOR</button>
+            <button class="nav-btn star-btn" id="star-btn" style="display: none;">⭐ EJECUTAR COD</button>
             <button class="nav-btn" id="next-btn">SIGUIENTE AMBIENTE</button>
         </div>
     </div>
@@ -213,6 +228,7 @@
         const hudTitle = document.getElementById('hud-title');
         const nextBtn = document.getElementById('next-btn');
         const prevBtn = document.getElementById('prev-btn');
+        const starBtn = document.getElementById('star-btn');
         const fadeOverlay = document.getElementById('fade-overlay');
         const btsStar = document.getElementById('bts-star');
 
@@ -225,8 +241,10 @@
 
         function stopAllAudios() {
             Object.values(audios).forEach(audio => {
-                audio.pause();
-                audio.currentTime = 0;
+                if (audio) {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }
             });
         }
 
@@ -258,6 +276,14 @@
             playAudio(1);
         });
 
+        // Función para ejecutar la redirección a Cod.html
+        function executeCod() {
+            stopAllAudios();
+            triggerFade(() => {
+                window.location.href = "Cod.html";
+            });
+        }
+
         // Cambiar de ambiente
         function updateStage(newStage) {
             triggerFade(() => {
@@ -268,22 +294,22 @@
                     hudTitle.innerText = "AMBIENTE 1: 1.png";
                     prevBtn.style.display = 'none';
                     nextBtn.style.display = 'block';
-                    nextBtn.innerText = "SIGUIENTE AMBIENTE";
+                    starBtn.style.display = 'none';
                     btsStar.setAttribute('visible', 'false');
                 } else if (currentStage === 2) {
                     sky.setAttribute('src', '#img-amb2');
                     hudTitle.innerText = "AMBIENTE 2: 2.jpg";
                     prevBtn.style.display = 'block';
                     nextBtn.style.display = 'block';
-                    nextBtn.innerText = "SIGUIENTE AMBIENTE";
+                    starBtn.style.display = 'none';
                     btsStar.setAttribute('visible', 'false');
                 } else if (currentStage === 3) {
                     sky.setAttribute('src', '#img-amb3');
-                    hudTitle.innerText = "AMBIENTE 3: 3.jpg (¡Busca la estrella!)";
+                    hudTitle.innerText = "AMBIENTE 3: 3.jpg (Presiona el botón de Estrella para continuar)";
                     prevBtn.style.display = 'block';
-                    nextBtn.style.display = 'none'; // Ocultamos botón normal para dar paso a la estrella
-                    // Mostramos la estrella especial flotando en el espacio 360
-                    btsStar.setAttribute('visible', 'true');
+                    nextBtn.style.display = 'none';
+                    starBtn.style.display = 'block'; // Muestra el botón Estrella en la barra inferior
+                    btsStar.setAttribute('visible', 'true'); // Muestra la Estrella 3D
                 }
                 
                 playAudio(currentStage);
@@ -306,18 +332,11 @@
             }
         });
 
-        // Acción al hacer clic / tocar la estrella especial de BTS en el ambiente 3
-        btsStar.addEventListener('click', () => {
-            if (currentStage === 3) {
-                // Detener completamente la música del ambiente 3
-                stopAllAudios();
-                
-                // Transición fluida y redirección a Cod.html
-                triggerFade(() => {
-                    window.location.href = "Cod.html";
-                });
-            }
-        });
+        // Acción al hacer clic en el botón ⭐ del menú inferior
+        starBtn.addEventListener('click', executeCod);
+
+        // Acción al hacer clic / tocar la estrella 3D flotante
+        btsStar.addEventListener('click', executeCod);
     </script>
 </body>
 </html>
