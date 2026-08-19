@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Experiencia 360° BTS</title>
-    <!-- Librería A-Frame para panoramas 360 -->
+    <!-- Librería A-Frame -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <style>
         * {
@@ -147,7 +147,7 @@
             100% { transform: scale(1.12); box-shadow: 0 0 30px rgba(212, 165, 255, 1); }
         }
 
-        /* Escena de Ejecución Real del Código HTML "COD" */
+        /* Escena de Ejecución del Código "Cod" */
         #cod-screen {
             position: fixed;
             top: 0;
@@ -161,14 +161,13 @@
             transition: opacity 0.8s ease;
         }
 
-        /* Renderizador Frame para ejecutar el HTML externo o embebido */
         #cod-frame {
             width: 100%;
             height: 100%;
             border: none;
         }
 
-        /* Barra flotante sobre la ejecución del código */
+        /* Control flotante dentro de la ejecución de Cod */
         .cod-overlay-ui {
             position: absolute;
             top: 20px;
@@ -191,7 +190,7 @@
             font-weight: 500;
         }
 
-        /* Capa de Transición (Fade) */
+        /* Capa de Transición */
         #fade-overlay {
             position: fixed;
             top: 0;
@@ -215,14 +214,14 @@
         <button class="bts-btn" id="start-btn">INICIAR EXPERIENCIA</button>
     </div>
 
-    <!-- Escena donde se Ejecuta el Código HTML "COD" -->
+    <!-- Escena donde se ejecuta el archivo HTML "Cod.html" -->
     <div id="cod-screen">
         <div class="cod-overlay-ui">
             <span class="song-tag">🎶 Reproduciendo: 4. Permission</span>
             <button class="bts-btn" id="restart-btn" style="padding: 8px 20px; font-size: 0.9rem;">🔄 REINICIAR</button>
         </div>
-        <!-- Iframe ejecutante del archivo HTML 'cod.html' (o código incrustado) -->
-        <iframe id="cod-frame" src="cod.html"></iframe>
+        <!-- Renderiza directamente el archivo Cod.html -->
+        <iframe id="cod-frame"></iframe>
     </div>
 
     <!-- Capa de Transición Visual -->
@@ -239,7 +238,6 @@
 
         <a-sky id="sky-sphere" src="#img-amb1" rotation="0 -90 0"></a-sky>
 
-        <!-- Estrella 3D interactiva -->
         <a-entity id="bts-star" position="0 1.6 -3" visible="false">
             <a-entity mixin="star-spin">
                 <a-cone class="raycastable" position="0 0.5 0" rotation="180 0 0" radius-bottom="0.45" height="0.9" color="#c77dff" material="emissive: #9d4edd; emissiveIntensity: 0.9;"></a-cone>
@@ -263,7 +261,7 @@
         </div>
     </div>
 
-    <!-- Audios -->
+    <!-- Audios del Proyecto -->
     <audio id="audio-1" src="1 Butter1.mp3" preload="auto" loop></audio>
     <audio id="audio-2" src="2. DYNAMITE.mp3" preload="auto" loop></audio>
     <audio id="audio-3" src="3. Boy.mp3" preload="auto" loop></audio>
@@ -303,7 +301,7 @@
         function playAudio(stage) {
             stopAllAudios();
             if(audios[stage]) {
-                audios[stage].play().catch(e => console.log("Esperando interacción de usuario para audio", e));
+                audios[stage].play().catch(e => console.log("Esperando acción de usuario para audio", e));
             }
         }
 
@@ -317,7 +315,7 @@
             }, 600);
         }
 
-        // Iniciar
+        // Iniciar Experiencia
         document.getElementById('start-btn').addEventListener('click', () => {
             welcomeScreen.style.opacity = '0';
             setTimeout(() => {
@@ -328,33 +326,33 @@
             playAudio(1);
         });
 
-        // Función para ejecutar el código HTML "COD" + iniciar "4. Permission"
+        // Ejecutar "Cod.html" con la ruta con C mayúscula y reproducir "4. Permission"
         function executeCod() {
             stopAllAudios();
             triggerFade(() => {
                 uiContainer.style.display = 'none';
                 codScreen.style.display = 'block';
                 
-                // Recargar/reproducir el frame con el archivo HTML ejecutables 'cod.html'
-                codFrame.src = "cod.html";
+                // Carga directa del archivo Cod.html (sensible a mayúsculas)
+                codFrame.src = "Cod.html";
 
                 setTimeout(() => {
                     codScreen.style.opacity = '1';
                 }, 50);
 
-                playAudio(4); // Inicia la canción "4. Permission"
+                playAudio(4); // Reproduce "4. Permission"
             });
         }
 
-        // Botón Reiniciar dentro de la escena de código ejecutado
+        // Botón Reiniciar disponible dentro de la pantalla de ejecución
         restartBtn.addEventListener('click', () => {
             stopAllAudios();
             triggerFade(() => {
                 codScreen.style.opacity = '0';
                 codScreen.style.display = 'none';
-                codFrame.src = ""; // Detener ejecución del iframe
+                codFrame.src = ""; // Detener la ejecución de Cod.html
 
-                // Reset a Ambiente 1
+                // Regresar a Ambiente 1
                 currentStage = 1;
                 sky.setAttribute('src', '#img-amb1');
                 hudTitle.innerText = "AMBIENTE 1: 1.png";
@@ -368,7 +366,7 @@
             });
         });
 
-        // Transición de Ambientes 360°
+        // Transición de Ambientes
         function updateStage(newStage) {
             triggerFade(() => {
                 currentStage = newStage;
@@ -410,7 +408,7 @@
             else if (currentStage === 3) updateStage(2);
         });
 
-        // Disparadores para ejecutar el código HTML al pulsar la estrella
+        // Eventos para ejecutar el código "Cod"
         starBtn.addEventListener('click', executeCod);
         btsStar.addEventListener('click', executeCod);
     </script>
